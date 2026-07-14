@@ -14,7 +14,7 @@ let duracaoFoco = 1500;
 let duracaoDescansoCurto = 300; 
 let duracaoDescansoLongo = 900; 
 
-let tempoDecorrido = 5;
+let tempoDecorrido = 1500;
 let intervaloId = null;
 
 const botoes = document.querySelectorAll('.app__card-button');
@@ -23,11 +23,21 @@ const musicaFocoInput = document.querySelector('#alternar-musica');
 const musica = new Audio('/sons/luna-rise-part-one.mp3');
 musica.loop = true;
 
+const somInit = new Audio('/sons/play.wav');
+const somPause = new Audio('/sons/pause.mp3');
+const somFinalTemporizador = new Audio('/sons/beep.mp3');
+
+const iniciarOuPausarBtn = document.querySelector('#start-pause span');
+const iniciarOuPausarImg = document.querySelector('#start-pause img');
+
+const timerNaTela = document.querySelector('#timer')
+
 musicaFocoInput.addEventListener('change', () => {
     if(musica.paused){
         musica.play()
     } else{
         musica.pause()
+        somPause.play()
     }
 });
 
@@ -83,13 +93,40 @@ function alterarContexto(contexto){
 
 
 const contagemRegressiva = () => {
-    iniciar()
+    if(tempoDecorrido <= 0){
+        somFinalTemporizador.play()
+        alert('Tempo finalizado')
+        zerar()
+        return;
+    }
     tempoDecorrido -= 1
-    console.log('Temporizador: ' + tempoDecorrido)
+    mostrarTempo()
 }
 
-initBtn.addEventListener('click', contagemRegressiva)
+initBtn.addEventListener('click', iniciarOuPausar)
 
-function iniciar(){
+function iniciarOuPausar(){
+    if(intervaloId){
+        somPause.play()
+        zerar()
+        return;
+    }
+    somInit.play()
     intervaloId = setInterval(contagemRegressiva, 1000)
+    iniciarOuPausarBtn.textContent = "Pausar"
+    iniciarOuPausarImg.setAttribute('src', `/imagens/pause.png`)
 }
+
+function zerar(){
+    clearInterval(intervaloId)
+    iniciarOuPausarBtn.textContent = "Iniciar"
+    iniciarOuPausarImg.setAttribute('src', `/imagens/play_arrow.png`)
+    intervaloId = null
+}
+
+function mostrarTempo(){
+    const tempo = tempoDecorrido
+    timerNaTela.innerHTML = `${tempo}`
+}
+
+mostrarTempo()
